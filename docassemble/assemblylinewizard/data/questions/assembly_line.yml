@@ -117,6 +117,8 @@ subquestion: |
   ** There may be a problem with this file. Check for the wrong number
   of fields**
   % endif
+  
+  ${ get_person_variables(fields + signature_fields + built_in_fields_used) }
 fields:
   - Title: interview.title
     default: ${short_filename_with_spaces}
