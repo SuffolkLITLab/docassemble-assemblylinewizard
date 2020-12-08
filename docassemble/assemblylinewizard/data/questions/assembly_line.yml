@@ -35,24 +35,6 @@ code: |
   generator_data.set('sequence',sequence+1)
   increment_sequence = True
 ---
-comment: |
-  This is a list of some variables we leave alone (don't transform)
-  but still represent something we're handling in basic-question.yml
-  No need to prompt the user to group these questions.
-variable name: variables_to_skip
-data:
-  - signature_date
-  - plaintiff
-  - plaintiffs
-  - defendant
-  - defendants
-  - petitioner
-  - petitioners
-  - witnesses
-  - users
-  - other_parties
-  - children
----
 mandatory: True
 id: Interview Order
 code: |
@@ -113,12 +95,12 @@ subquestion: |
   Use plain language that will be understandable to someone who
   uses this form without a lawyer. Remember, we can change it later.
   
-  % if len(all_fields) != len(fields) + len(signature_fields) + len(built_in_fields_used):
-  ** There may be a problem with this file. Check for the wrong number
-  of fields**
-  % endif
-  
-  ${ get_person_variables(fields + signature_fields + built_in_fields_used) }
+#  % if len(all_fields) != len(fields) + len(signature_fields) + len(built_in_fields_used):
+#  ** There may be a problem with this file. Check for the wrong number
+#  of fields**
+#  % endif
+#  
+#  ${ get_person_variables(fields + signature_fields + built_in_fields_used) }
 fields:
   - Title: interview.title
     default: ${short_filename_with_spaces}
@@ -145,17 +127,7 @@ fields:
       - Probate and Family Court
       - Juvenile Court
       - Land Court
-  # - Preferred court: interview.preferred_court
-  #   choices:
-  #     - Boston Municipal Court
-  #     - District Court
-  #     - Superior Court
-  #     - Housing Court
-  #     - Probate and Family Court
-  #     - Juvenile Court
-  #     - Land Court
-  #     - Any court (no preferred court)
-  - Categories: interview.categories
+  - Topics: interview.categories
     datatype: checkboxes
     choices:
       - Housing
@@ -185,37 +157,37 @@ fields:
   - Link to original form: interview.original_form
     hint: http://masslegalhelp.org/my_form
     required: False
-help: |
-  ${len(all_fields)}
-  
-  `${all_fields}`
-  
-  * ${len(fields)} Fields we'll ask about
-  * ${len(built_in_fields_used)} built-in fields
-  * ${len(signature_fields)} signature fields
-  
-  ${fields}
+#help: |
+#  ${len(all_fields)}
+#  
+#  `${all_fields}`
+#  
+#  * ${len(fields)} Fields we'll ask about
+#  * ${len(built_in_fields_used)} built-in fields
+#  * ${len(signature_fields)} signature fields
+#  
+#  ${fields}
 ---
 question: |
   Information about people on this form
-subquestion: |  
-  For this ${interview.title} form, is the user of the form typically the 
-  Plaintiff/Petitioner or the Defendant/Respondent?
-
-  The Plaintiff/Petitioner starts a case. The Defendant/Respondent
-  is responding to a case someone else started.
 fields:
-  - User's role: interview.typical_role
+  - note: |
+      The list of names below look like names for people, based on
+      how you use them in your document.
+  - Which variable names represent people?: people_variables
+    datatype: checkboxes
+    code: |
+      get_person_variables(all_fields, custom_only=True)
+  - The user or client for this form: interview.typical_role
     input type: radio
     choices:
-      - Plaintiff/Petitioner: plaintiff
-      - Defendant/Respondent: defendant
+      - Started the case: plaintiff
+      - Is responding to a case started by someone else: defendant
       - Could be either: unknown
   - Number of users whose information can be filled in on this form: user_count
     choices:
       - One user of this form at a time: one
       - More than one user can sign and file this form at once: multiple
-      
 help: |
   For example, if you are starting a new case, you are always the plaintiff
   or petitioner. 
@@ -242,7 +214,7 @@ comment: |
 code: |
   # These all must be defined in advance to avoid duplicates
   all_fields
-  variables_to_skip
+  # variables_to_skip
   fields
   signature_fields
   built_in_fields_used  
@@ -254,8 +226,8 @@ code: |
       # Check to see if we think this is a built-in field (a
       # field handled in basic-questions.yml),
       # a signature field, or an arbitrary field.
-      is_reserved_name = is_reserved_label(pdf_field_name)
-      if is_reserved_name or pdf_field_name in variables_to_skip:
+      # is_reserved_name = 
+      if is_reserved_label(pdf_field_name):
         new_field = built_in_fields_used.appendObject()
       elif pdf_field_tuple[4] == '/Sig':
         new_field = signature_fields.appendObject()

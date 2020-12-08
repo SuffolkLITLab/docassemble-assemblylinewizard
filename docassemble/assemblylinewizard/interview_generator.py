@@ -1093,23 +1093,27 @@ def should_be_stringified(var_name):
   is_docket_number = var_name.startswith("docket_numbers[")
   return has_no_attributes and not is_docket_number
 
-def get_person_variables(fieldslist, people_vars=generator_constants.PEOPLE_VARS, people_suffixes = generator_constants.PEOPLE_SUFFIXES):
+def get_person_variables(fieldslist, people_vars=generator_constants.PEOPLE_VARS, people_suffixes = generator_constants.PEOPLE_SUFFIXES, people_suffixes_map = generator_constants.PEOPLE_SUFFIXES_MAP, custom_only=False):
   """
   Identify the field names that represent people in the list of
-  DAFields pulled from docx/PDF.    
+  string fields pulled from docx/PDF.    
   """
   people = set()
   for field in fieldslist:
-    if remove_string_wrapper(field.variable) in people_vars:
-      people.add(field.variable)
-    if '[' in field.variable or '.' in field.variable:
+    if remove_string_wrapper(field) in people_vars:
+      people.add(field)
+    if '[' in field or '.' in field:
       match_with_brackets_or_attribute = r"(\D\w*)((\[.*)|(\..*))"
-      matches = re.match(match_with_brackets_or_attribute, field.variable)
+      matches = re.match(match_with_brackets_or_attribute, field)
       if matches:
         # Is the name before attribute/index a predetermined person?  
         if matches.groups()[0] in people_vars:
           people.add(matches.groups()[0])
         else:
-          if matches.groups()[1] in people_suffixes:
+          # Look for prefixes normally associated with people
+          if matches.groups()[1] in people_suffixes or matches.groups()[1] in list(people_suffixes_map.keys()) :
             people.add(matches.groups()[0])
-  return people
+  if custom_only:
+    return people - set(people_vars)
+  else:
+    return people
