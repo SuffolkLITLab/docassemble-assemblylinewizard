@@ -23,7 +23,13 @@ from .generator_constants import generator_constants
 
 TypeType = type(type(None))
 
-__all__ = ['Playground', 'PlaygroundSection', 'indent_by', 'varname', 'DAField', 'DAFieldList', 'DAQuestion', 'DAInterview', 'DAAttachmentList', 'DAAttachment', 'to_yaml_file', 'base_name', 'to_package_name', 'oneline', 'DAQuestionList', 'map_names', 'is_reserved_label', 'fill_in_field_attributes', 'attachment_download_html', 'get_fields','fill_in_docx_field_attributes','is_reserved_docx_label','get_character_limit']
+__all__ = ['Playground', 'PlaygroundSection', 'indent_by', 'varname', 'DAField', 'DAFieldList', \
+           'DAQuestion', 'DAInterview', 'DAAttachmentList', 'DAAttachment', 'to_yaml_file', \
+           'base_name', 'to_package_name', 'oneline', 'DAQuestionList', 'map_names', \
+           'is_reserved_label', 'fill_in_field_attributes', 'attachment_download_html', \
+           'get_fields', 'fill_in_docx_field_attributes', 'is_reserved_docx_label', \
+           'get_character_limit', 'consolidate_yesnos'
+]
 
 always_defined = set(["False", "None", "True", "dict", "i", "list", "menu_items", "multi_user", "role", "role_event", "role_needed", "speak_text", "track_location", "url_args", "x", "nav", "PY2", "string_types"])
 replace_square_brackets = re.compile(r'\\\[ *([^\\]+)\\\]')
@@ -131,7 +137,7 @@ def fill_in_field_attributes(new_field, pdf_field_tuple):
 def consolidate_yesnos(fields):
     """Go through and combine separate yes-no fields into the same field"""
     yesno_map = collections.defaultdict(list)
-    consolidated_fields = []
+    consolidated_fields = DAFieldList(gathered=True)
     for f in fields:
         if f.variable.endswith('_yes') or f.variable.endswith('_no'):
             if len(yesno_map[f.variable_name_guess]) == 1:

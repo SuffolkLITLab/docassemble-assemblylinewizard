@@ -345,12 +345,16 @@ code: |
 
   temp_field_question = []
   for index, field in enumerate(fields.elements):    
-    if field.variable != field.transformed_variable:
+    if hasattr(field, 'paired_yesno') and field.paired_yesno:
       temp_field_question.append({
-        'note': '**' + field.variable + ' (will be renamed to ' + field.transformed_variable + ')**'})
+        'note': bold(field.variable + ' (will be renamed to ' + field.variable + '_yes and ' + field.variable + '_no)')})
+    elif field.variable != field.transformed_variable:
+      temp_field_question.append({
+        'note': bold(field.variable + ' (will be renamed to ' + field.transformed_variable + ')')
+        })
     else:
       temp_field_question.append({
-        'note': '**' + field.variable + '**'
+        'note': bold(field.variable)
       })
     temp_field_question.append({
       'label': "On-screen prompt",
