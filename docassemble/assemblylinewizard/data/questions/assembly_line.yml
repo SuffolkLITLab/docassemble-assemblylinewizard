@@ -272,7 +272,9 @@ code: |
       else:                
         new_field = fields.appendObject()
       fill_in_docx_field_attributes(new_field, field)
-    
+
+  fields = consolidate_yesnos(fields)
+
   get_all_fields = True
 ---
 code: |
